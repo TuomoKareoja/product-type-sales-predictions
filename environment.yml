@@ -5,7 +5,6 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - alabaster=0.7.12=py37_0
-  - altair=3.2.0=py37_0
   - appdirs=1.4.3=py37h28b3542_0
   - asn1crypto=0.24.0=py37_0
   - astroid=2.2.5=py37_0
@@ -149,4 +148,3 @@ dependencies:
   - zeromq=4.3.2=he1b5a44_2
   - zipp=0.5.2=py_0
   - zlib=1.2.11=h7b6447c_3
-
