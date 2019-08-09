@@ -56,7 +56,7 @@ data.columns = [
     "weight",
     "depth",
     "width",
-    "product_height",
+    "height",
     "profit_margin",
     "volume",
     "train",
@@ -137,7 +137,7 @@ draw_swarmplot("product_type", "depth", data)
 #%%
 draw_swarmplot("product_type", "width", data)
 #%%
-draw_swarmplot("product_type", "product_height", data)
+draw_swarmplot("product_type", "height", data)
 #%%
 draw_swarmplot("product_type", "profit_margin", data)
 #%%
@@ -155,10 +155,10 @@ corr.style.background_gradient(cmap="coolwarm", axis=None)
 # 5 star reviews have a perfect correlation to volume. This cannot not be right
 # 4 and 3 star reviews have very high correlation. 3 star reviews could be dropped
 # if multicollinearity starts to be problem, because it has lower correlation
-# with volume. Same with 2 and 1 start reviews
+# with volume. Same with 2 and 1 star reviews
 
 # product number does not correlate with anything. This was just to check
-# if the would have been some coding errors in the data. We can now drop this
+# if the would have been some coding errors in the data. We can drop this
 # feature as useless
 
 #%%
@@ -186,7 +186,11 @@ for i, product_id in enumerate(data_plot.product_num.astype(object)):
 
 #%%
 
-# product number 123 has more reviews than sales. This seems very suspicious
+# product number 123 has more reviews than sales. This seems to mostly because
+# of a huge number of 1 star reviews. Probably review bombing?
+# We should probably just drop this product it is really difficult the
+# the decide which review or reviews are wrong. Or we could assign all
+# review values as missing
 data.loc[data.product_num == 123].head()
 
 #%%
@@ -197,6 +201,23 @@ data.loc[data.product_num == 123].head()
 # variables and use the median of the prices
 data.loc[data.product_type == "ExtendedWarranty"]
 
+#%%
+
+# checking out missing
+data.isnull().mean().multiply(100).round(0)
+# we have lots of missing values in bestseller_rank. Maybe we should create a model
+# to input these?
 
 #%%
 
+# checking if something should be missing but is not
+# counting the number of values missing or zero
+data.fillna(0).astype(bool).mean().multiply(100).round(0)
+
+#%%
+# depth and width have zero values but there should now be any
+data[(data.depth == 0) | (data.width == 0) | (data.height == 0)]
+
+# All of these products have weight so depth, width and height are
+# clearly just missing and not really 0
+# One of these is actually in the test set
