@@ -23,9 +23,13 @@ update_environment:
 export_environment:
 	conda env export --name $(PROJECT_NAME) | grep -v "^prefix: " > environment.yml
 
-## Fetch, clean and process the data
-data:
-	src/data/make_dataset.py
+## clean the data
+clean_data:
+	python src/data/clean_data.py
+
+## Add features to cleaned data
+build_features:
+	python src/data/build_features.py
 
 ## Delete all compiled Python files
 clean:
