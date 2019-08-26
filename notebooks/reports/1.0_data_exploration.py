@@ -193,6 +193,10 @@ for i, product_id in enumerate(data_plot.product_num.astype(object)):
 # review values as missing
 data.loc[data.product_num == 123].head()
 
+# UPDATE this is probably okay, because as we have reviews from products that we have not sold
+# yet (the observations to predict), the reviews must have been gathered from an external
+# review site. Because this is the case reviews and sales don't have to match
+
 #%%
 
 # From old knowledge we know that the product category 'extended warranty'

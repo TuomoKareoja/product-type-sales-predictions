@@ -1,8 +1,8 @@
-# """
-# .. module:: clean_data.py
-#     :synopsis:
+"""
+.. module:: clean_data.py
+    :synopsis:
 
-# """
+"""
 
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
@@ -47,21 +47,18 @@ data.columns = [
     "train",
 ]
 
-# Drop 5 star reviews as they have perfect correlation with volume. Impossible!
-data.drop(columns=["rew_5star"], inplace=True)
+# The product number column is not necessary so we drop it
+data.drop(columns=["product_num"], inplace=True)
 
-# Product number 123 has more reviews than sales. As there is something fishy
-# about this we mark all the reviews of this product as missing
-data.loc[
-    data.product_num == 123, ["rew_4star", "rew_3star", "rew_2star", "rew_1star"]
-] = np.nan
+# Drop 5 star reviews as they have perfect correlation with sales volume. Impossible!
+data.drop(columns=["rew_5star"], inplace=True)
 
 # mark depth, width and height 0 as missing
 data[["weight", "depth", "width"]].replace(0, np.nan, inplace=True)
 
 # Combining the Extended Warranty products in the train data that have almost
 # identical values (most importantly reviews and volume). The problematic
-# observations can be recognized from the fact that they volume 1232.
+# observations can be recognized from the fact that they have volume 1232.
 # We combide these rows to one using the median of the values and the
 # lowest product number
 fixed_warranty_row = pd.DataFrame(
@@ -70,9 +67,6 @@ fixed_warranty_row = pd.DataFrame(
 
 # Adding back the product type category that was dropping because of the median calculation
 fixed_warranty_row["product_type"] = "ExtendedWarranty"
-
-# marking product number as unknown as this not a real product
-fixed_warranty_row["product_num"] = np.nan
 
 # fixing column types
 fixed_warranty_row["product_type"] = fixed_warranty_row["product_type"].astype("object")
@@ -113,4 +107,4 @@ data = pd.concat([data, fixed_warranty_row], copy=False, sort=False)
 
 # saving to /clean
 data_clean_path = os.path.join("data", "clean", "clean_train_pred.csv")
-data.to_csv(data_clean_path)
+data.to_csv(data_clean_path, index=False)
