@@ -28,8 +28,15 @@ data_pred.drop(columns=["train"], inplace=True)
 # we don't need the target volume in the predict dataset
 data_pred.drop(columns=["volume"], inplace=True)
 
+# Separating target and features to different datasets
+X_train = data_train.drop(columns=["volume"])
+y_train = data_train[["volume"]]
+X_pred = data_pred
+
 # Saving to disk
-data_processed_path_train = os.path.join("data", "processed", "processed_train.csv")
-data_processed_path_pred = os.path.join("data", "processed", "processed_pred.csv")
-data_train.to_csv(data_processed_path_train, index=False)
-data_pred.to_csv(data_processed_path_pred, index=False)
+data_processed_path_X_train = os.path.join("data", "processed", "X_train.csv")
+data_processed_path_y_train = os.path.join("data", "processed", "y_train.csv")
+data_processed_path_X_pred = os.path.join("data", "processed", "X_pred.csv")
+X_train.to_csv(data_processed_path_X_train, index=False)
+y_train.to_csv(data_processed_path_y_train, index=False)
+X_pred.to_csv(data_processed_path_X_pred, index=False)
