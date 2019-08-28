@@ -258,14 +258,14 @@ pipelines.append(
 
 #%%
 
-# plot_cv_scores(
-#     pipelines=pipelines,
-#     X=X_no_bestseller,
-#     y=y,
-#     crossvalidation=crossvalidation,
-#     scoring=scoring,
-#     file_suffix="unoptimized",
-# )
+plot_cv_scores(
+    pipelines=pipelines,
+    X=X_no_bestseller,
+    y=y,
+    crossvalidation=crossvalidation,
+    scoring=scoring,
+    file_suffix="unoptimized",
+)
 
 plot_cv_predictions(
     pipelines=pipelines,
@@ -432,7 +432,7 @@ plot_cv_predictions(
 
 # On the basis of this explorations we decide to do the following things
 
-# 1. Dropping futher testing of KNN and SVM models as these perform baddly. Continuing
+# 2. Dropping futher testing of KNN and SVM models as these perform baddly. Continuing
 # to more precise testing with RF and LM
-# 2. We need to use some feature selection algoritm to as dropping features seems to create
+# 3. We need to use some feature selection algoritm to as dropping features seems to create
 # a lot of value
