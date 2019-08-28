@@ -63,7 +63,7 @@ pipelines.append(
         make_pipeline(
             SimpleImputer(missing_values=np.nan, strategy="mean"),
             preprocessing.StandardScaler(),
-            LinearSVR(random_state=seed),
+            LinearSVR(C=4, random_state=seed),
         ),
     )
 )
@@ -105,7 +105,7 @@ pipelines.append(
         make_pipeline(
             IterativeImputer(ExtraTreesRegressor(n_estimators=10, random_state=0)),
             preprocessing.StandardScaler(),
-            LinearSVR(random_state=seed),
+            LinearSVR(C=4, random_state=seed),
         ),
     )
 )
@@ -148,7 +148,7 @@ pipelines.append(
         make_pipeline(
             IterativeImputer(BayesianRidge()),
             preprocessing.StandardScaler(),
-            LinearSVR(random_state=seed),
+            LinearSVR(C=4, random_state=seed),
         ),
     )
 )
@@ -226,11 +226,12 @@ X_no_bestseller = X.drop(columns="bestseller_rank")
 
 pipelines = []
 
-# BayesianRidge
 pipelines.append(
     (
         "SVM_no_bestseller",
-        make_pipeline(preprocessing.StandardScaler(), LinearSVR(random_state=seed)),
+        make_pipeline(
+            preprocessing.StandardScaler(), LinearSVR(C=4, random_state=seed)
+        ),
     )
 )
 pipelines.append(
@@ -257,14 +258,14 @@ pipelines.append(
 
 #%%
 
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X_no_bestseller,
-    y=y,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="unoptimized",
-)
+# plot_cv_scores(
+#     pipelines=pipelines,
+#     X=X_no_bestseller,
+#     y=y,
+#     crossvalidation=crossvalidation,
+#     scoring=scoring,
+#     file_suffix="unoptimized",
+# )
 
 plot_cv_predictions(
     pipelines=pipelines,
@@ -274,18 +275,10 @@ plot_cv_predictions(
     file_suffix="unoptimized",
 )
 
-# for KNN and Linear models dropping the variable lowers the crossvalidation error,
-# but for random forest imputation makes the model better with bayesridge being
-# the best imputation method
+# For all models dropping the variable results in lower out of sample
+# prediction error
 
-#%%
-
-# It seems that SVM does not really like the values product category values
-# with these values the models performs dismally, but without them it at least
-# somewhat okay. I think that it would still be wise to drop this model
-# from futher consideration, as the performance is still not good
-
-# TODO no the problem is lack of iterations! No its the C!
+# Checking if dropping the product category also results in better results
 
 X_no_cat_no_bestseller = X.drop(
     columns=[
@@ -305,17 +298,35 @@ X_no_cat_no_bestseller = X.drop(
     ]
 )
 
-
 pipelines = []
 
-# BayesianRidge
 pipelines.append(
     (
         "SVM_no_cat_no_bestseller",
         make_pipeline(
-            preprocessing.StandardScaler(),
-            LinearSVR(C=8, max_iter=5000, random_state=seed),
+            preprocessing.StandardScaler(), LinearSVR(C=4, random_state=seed)
         ),
+    )
+)
+pipelines.append(
+    (
+        "RF_no_cat_no_bestseller",
+        make_pipeline(
+            preprocessing.StandardScaler(),
+            RandomForestRegressor(n_estimators=100, random_state=seed),
+        ),
+    )
+)
+pipelines.append(
+    (
+        "KNN_no_cat_no_bestseller",
+        make_pipeline(preprocessing.StandardScaler(), KNeighborsRegressor()),
+    )
+)
+pipelines.append(
+    (
+        "LM_no_cat_no_bestseller",
+        make_pipeline(preprocessing.StandardScaler(), LinearRegression()),
     )
 )
 
@@ -338,8 +349,90 @@ plot_cv_predictions(
     file_suffix="unoptimized",
 )
 
-# for KNN and Linear models dropping the variable lowers the crossvalidation error,
-# but for random forest imputation makes the model better with bayesridge being
-# the best imputation method
+# Dropping the product category makes all the models perform better
+#%%
+
+# Checking if dropping 3 and 1 star reviews helps. There features are highly correlated with
+# 4 and 2 star reviews respectively, but have a smaller correlation with volume
+
+X_no_cat_no_bestseller_less_stars = X.drop(
+    columns=[
+        "bestseller_rank",
+        "product_type_Accessories",
+        "product_type_Display",
+        "product_type_ExtendedWarranty",
+        "product_type_GameConsole",
+        "product_type_Laptop",
+        "product_type_Netbook",
+        "product_type_PC",
+        "product_type_Printer",
+        "product_type_PrinterSupplies",
+        "product_type_Smartphone",
+        "product_type_Software",
+        "product_type_Tablet",
+        "rew_3star",
+        "rew_1star",
+    ]
+)
+
+pipelines = []
+
+pipelines.append(
+    (
+        "SVM_no_cat_no_bestseller_less_stars",
+        make_pipeline(
+            preprocessing.StandardScaler(), LinearSVR(C=4, random_state=seed)
+        ),
+    )
+)
+pipelines.append(
+    (
+        "RF_no_cat_no_bestseller_less_stars",
+        make_pipeline(
+            preprocessing.StandardScaler(),
+            RandomForestRegressor(n_estimators=100, random_state=seed),
+        ),
+    )
+)
+pipelines.append(
+    (
+        "KNN_no_cat_no_bestseller_less_stars",
+        make_pipeline(preprocessing.StandardScaler(), KNeighborsRegressor()),
+    )
+)
+pipelines.append(
+    (
+        "LM_no_cat_no_bestseller_less_stars",
+        make_pipeline(preprocessing.StandardScaler(), LinearRegression()),
+    )
+)
 
 #%%
+
+plot_cv_scores(
+    pipelines=pipelines,
+    X=X_no_cat_no_bestseller_less_stars,
+    y=y,
+    crossvalidation=crossvalidation,
+    scoring=scoring,
+    file_suffix="unoptimized",
+)
+
+plot_cv_predictions(
+    pipelines=pipelines,
+    X=X_no_cat_no_bestseller_less_stars,
+    y=y,
+    crossvalidation=crossvalidation,
+    file_suffix="unoptimized",
+)
+
+# Dropping the start makes all models except knn perform better.
+
+#%%
+
+# On the basis of this explorations we decide to do the following things
+
+# 1. Dropping futher testing of KNN and SVM models as these perform baddly. Continuing
+# to more precise testing with RF and LM
+# 2. We need to use some feature selection algoritm to as dropping features seems to create
+# a lot of value

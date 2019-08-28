@@ -76,6 +76,7 @@ def plot_cv_scores(pipelines, X, y, crossvalidation, scoring, file_suffix=""):
         plot_title = (
             "model_comparison_" + file_suffix + "_" + score_method.lower() + ".png"
         )
+        plt.xticks(rotation=90)
         plt.savefig(os.path.join(path_figures, plot_title), dpi=200)
         plt.show()
         plt.clf()
@@ -97,20 +98,36 @@ def plot_cv_predictions(pipelines, X, y, crossvalidation, file_suffix=""):
     path_figures = os.path.join("reports", "figures")
 
     for name, pipeline in pipelines:
-        predicted = cross_val_predict(pipeline, X, y, cv=crossvalidation)
+        predicted_outsample = cross_val_predict(pipeline, X, y, cv=crossvalidation)
+        predicted_insample = pipeline.fit(X, y).predict(X)
         fig, ax = plt.subplots()
-        ax.scatter(y, predicted, edgecolors=(0, 0, 0))
+        ax.scatter(y, predicted_outsample, c="r", marker="+", label="outsample")
+        ax.scatter(y, predicted_insample, c="b", marker="x", label="insample")
         ax.plot([y.min(), y.max()], [y.min(), y.max()], "k--", lw=3)
-        fig.suptitle(name + ": " + "Predicted vs Actual")
-        ax.set_xlabel("Actual Volume")
-        ax.set_ylabel("Predicted Volume")
-        model_mean_absolute_error = round(metrics.mean_absolute_error(y, predicted))
+        model_mean_absolute_error_outsample = round(
+            metrics.mean_absolute_error(y, predicted_outsample)
+        )
+        model_mean_absolute_error_insample = round(
+            metrics.mean_absolute_error(y, predicted_insample)
+        )
         plt.text(
-            0.2,
-            0.8,
-            "Mean absolute error: " + str(model_mean_absolute_error),
+            0.05,
+            0.9,
+            "Mean absolute error (outsample): "
+            + str(model_mean_absolute_error_outsample),
             transform=ax.transAxes,
         )
+        plt.text(
+            0.05,
+            0.8,
+            "Mean absolute error (insample): "
+            + str(model_mean_absolute_error_insample),
+            transform=ax.transAxes,
+        )
+        ax.set_xlabel("Actual Volume")
+        ax.set_ylabel("Predicted Volume")
+        plt.legend(loc=4)
+        fig.suptitle(name + ": " + "Predicted vs Actual")
         plot_title = "predictions_" + file_suffix + "_" + name.lower() + ".png"
         plt.savefig(os.path.join(path_figures, plot_title))
         plt.show()
