@@ -20,7 +20,6 @@ from sklearn import metrics
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_selection import RFECV
 
-from src.visualization.visualize import plot_cv_scores
 from src.visualization.visualize import plot_cv_predictions
 
 
@@ -41,25 +40,6 @@ y = y.iloc[:, 0]
 # dropping the best seller rank, because it contains missing values and does not
 # seem to help
 X.drop(columns=["bestseller_rank"], inplace=True)
-
-#%%
-
-# Plotting the volume histogram to see if a transformation could help
-sns.distplot(y, bins=20)
-
-#%%
-# Taking the log of the target makes it much more normally distributed
-# this should lessen the effects of extreme values
-
-sns.distplot(np.log(y).clip(lower=0), bins=20)
-
-#%%
-
-# Lets transform y to log and continue with that
-# We need to apply lower 0 because there are some zero values and these would
-# be -inf if we don't do this
-
-y_log = np.log(y).clip(lower=0)
 
 #%%
 
@@ -101,15 +81,6 @@ pipelines.append(("GLMNET", make_pipeline(ElasticNet(**glmnet_best_params_matchi
 
 #%%
 
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X,
-    y=y,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="optimized",
-)
-
 plot_cv_predictions(
     pipelines=pipelines,
     X=X,
@@ -150,15 +121,6 @@ pipelines.append(("Lasso", make_pipeline(ElasticNet(**glmnet_best_params_matchin
 
 #%%
 
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X,
-    y=y,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="optimized",
-)
-
 plot_cv_predictions(
     pipelines=pipelines,
     X=X,
@@ -169,6 +131,25 @@ plot_cv_predictions(
 
 # Now the model performes better than the manually dropping variables, but only
 # in insample. The outsample error is still terrible.
+
+#%%
+
+# Plotting the volume histogram to see if a transformation could help
+sns.distplot(y, bins=20)
+
+#%%
+# Taking the log of the target makes it much more normally distributed
+# this should lessen the effects of extreme values
+
+sns.distplot(np.log(y).clip(lower=0), bins=20)
+
+#%%
+
+# Lets transform y to log and continue with that
+# We need to apply lower 0 because there are some zero values and these would
+# be -inf if we don't do this
+
+y_log = np.log(y).clip(lower=0)
 
 #%%
 
@@ -199,15 +180,6 @@ pipelines = []
 
 pipelines.append(
     ("GLMNET_log", make_pipeline(ElasticNet(**glmnet_best_params_matching)))
-)
-
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X,
-    y=y_log,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="optimized_log",
 )
 
 plot_cv_predictions(
@@ -241,15 +213,6 @@ pipelines = []
 
 pipelines.append(
     ("Lasso_log", make_pipeline(ElasticNet(**glmnet_best_params_matching)))
-)
-
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X,
-    y=y_log,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="optimized",
 )
 
 plot_cv_predictions(
@@ -322,15 +285,6 @@ pipelines.append(
 
 pipelines.append(("LM_rfe", make_pipeline(LinearRegression())))
 
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X_rfe,
-    y=y,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="optimized",
-)
-
 plot_cv_predictions(
     pipelines=pipelines,
     X=X_rfe,
@@ -379,15 +333,6 @@ pipelines = []
 
 pipelines.append(
     ("GLMNET_rfe", make_pipeline(ElasticNet(**glmnet_best_params_matching)))
-)
-
-plot_cv_scores(
-    pipelines=pipelines,
-    X=X_rfe,
-    y=y,
-    crossvalidation=crossvalidation,
-    scoring=scoring,
-    file_suffix="best",
 )
 
 plot_cv_predictions(
