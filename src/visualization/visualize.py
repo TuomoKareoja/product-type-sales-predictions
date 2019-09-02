@@ -82,7 +82,15 @@ def plot_cv_scores(pipelines, X, y, crossvalidation, scoring, file_suffix=""):
         plt.clf()
 
 
-def plot_cv_predictions(pipelines, X, y, crossvalidation, file_suffix=""):
+def plot_cv_predictions(
+    pipelines,
+    X,
+    y,
+    crossvalidation,
+    file_suffix="",
+    transformation=None,
+    round_digits=0,
+):
     """Plots crossvalidation predictions with given pipelines
     
     Arguments:
@@ -93,6 +101,8 @@ def plot_cv_predictions(pipelines, X, y, crossvalidation, file_suffix=""):
    
     Keyword Arguments:
         file_suffix {str} -- suffix to add to plot names to distinguish them (default: {""})
+        round_digits {str} -- What transformation to apply to predictions after creating them (default: {None})
+        round_digits {int} -- How many digits to show in printed error measures (default: {""})
     """
 
     path_figures = os.path.join("reports", "figures")
@@ -100,15 +110,19 @@ def plot_cv_predictions(pipelines, X, y, crossvalidation, file_suffix=""):
     for name, pipeline in pipelines:
         predicted_outsample = cross_val_predict(pipeline, X, y, cv=crossvalidation)
         predicted_insample = pipeline.fit(X, y).predict(X)
+        if transformation == "exp":
+            predicted_insample = np.exp(predicted_insample)
+            predicted_outsample = np.exp(predicted_outsample)
+            y = np.exp(y)
         fig, ax = plt.subplots()
         ax.scatter(y, predicted_outsample, c="r", marker="+", label="outsample")
         ax.scatter(y, predicted_insample, c="b", marker="x", label="insample")
         ax.plot([y.min(), y.max()], [y.min(), y.max()], "k--", lw=3)
         model_mean_absolute_error_outsample = round(
-            metrics.mean_absolute_error(y, predicted_outsample)
+            metrics.mean_absolute_error(y, predicted_outsample), round_digits
         )
         model_mean_absolute_error_insample = round(
-            metrics.mean_absolute_error(y, predicted_insample)
+            metrics.mean_absolute_error(y, predicted_insample), round_digits
         )
         plt.text(
             0.05,
