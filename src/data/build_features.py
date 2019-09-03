@@ -1,9 +1,3 @@
-"""
-.. module:: build_features.py
-    :synopsis:
-
-"""
-
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 import pandas as pd
@@ -16,6 +10,10 @@ data = pd.read_csv(data_clean_path)
 
 # one-hot-encoding the product type
 data = pd.get_dummies(data)
+
+# Dropping the extended warranty column as there are zero
+# warranties in the training set
+data.drop(columns=["product_type_ExtendedWarranty"], inplace=True)
 
 # Splitting the data to train and predicting set
 data_train = data[data.train]

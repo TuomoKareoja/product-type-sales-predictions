@@ -31,6 +31,10 @@ clean_data:
 build_features:
 	python src/data/build_features.py
 
+## Train final models and predict with them
+predict:
+	python src/models/train_and_predict_comparison.py
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

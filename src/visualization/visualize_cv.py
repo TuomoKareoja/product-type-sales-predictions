@@ -1,9 +1,3 @@
-"""
-.. module:: visualize.py
-    :synopsis:
-
-"""
-
 import os
 import numpy as np
 import pandas as pd
@@ -90,6 +84,7 @@ def plot_cv_predictions(
     file_suffix="",
     transformation=None,
     round_digits=0,
+    limited_pred_mask=None,
 ):
     """Plots crossvalidation predictions with given pipelines
     
@@ -101,8 +96,9 @@ def plot_cv_predictions(
    
     Keyword Arguments:
         file_suffix {str} -- suffix to add to plot names to distinguish them (default: {""})
-        round_digits {str} -- What transformation to apply to predictions after creating them (default: {None})
-        round_digits {int} -- How many digits to show in printed error measures (default: {""})
+        transformation {str} -- What transformation to apply to predictions after creating them (default: {None})
+        round_digits {int} -- How many digits to show in printed error measures (default: {0})
+        limited_pred_mask {bool_list} -- Boolean list to filter the shown predictions (default: {False})
     """
 
     path_figures = os.path.join("reports", "figures")
@@ -114,15 +110,24 @@ def plot_cv_predictions(
             predicted_insample = np.exp(predicted_insample)
             predicted_outsample = np.exp(predicted_outsample)
             y = np.exp(y)
+
+        if limited_pred_mask is not None:
+
+            y_lim = y[limited_pred_mask]
+            predicted_insample = predicted_insample[limited_pred_mask]
+            predicted_outsample = predicted_outsample[limited_pred_mask]
+        else:
+            y_lim = y
+
         fig, ax = plt.subplots()
-        ax.scatter(y, predicted_outsample, c="r", marker="+", label="outsample")
-        ax.scatter(y, predicted_insample, c="b", marker="x", label="insample")
-        ax.plot([y.min(), y.max()], [y.min(), y.max()], "k--", lw=3)
+        ax.scatter(y_lim, predicted_outsample, c="r", marker="+", label="outsample")
+        ax.scatter(y_lim, predicted_insample, c="b", marker="x", label="insample")
+        ax.plot([y_lim.min(), y_lim.max()], [y_lim.min(), y_lim.max()], "k--", lw=3)
         model_mean_absolute_error_outsample = round(
-            metrics.mean_absolute_error(y, predicted_outsample), round_digits
+            metrics.mean_absolute_error(y_lim, predicted_outsample), round_digits
         )
         model_mean_absolute_error_insample = round(
-            metrics.mean_absolute_error(y, predicted_insample), round_digits
+            metrics.mean_absolute_error(y_lim, predicted_insample), round_digits
         )
         plt.text(
             0.05,

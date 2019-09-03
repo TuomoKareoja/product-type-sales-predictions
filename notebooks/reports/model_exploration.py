@@ -1,32 +1,25 @@
 #%%
 
-# Importing libraries
-import pandas as pd
-import numpy as np
-import sklearn
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn
 from dotenv import find_dotenv, load_dotenv
 from IPython.core.interactiveshell import InteractiveShell
-
-from sklearn.svm import LinearSVR
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.linear_model import BayesianRidge
-
 from sklearn import preprocessing
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
+from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
 from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
-from src.visualization.visualize import plot_cv_scores
-from src.visualization.visualize import plot_cv_predictions
+from sklearn.impute import IterativeImputer, SimpleImputer
+from sklearn.linear_model import BayesianRidge, LinearRegression
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import LinearSVR
+
+from src.visualization.visualize_cv import plot_cv_predictions, plot_cv_scores
 
 # Setting styles
 # %matplotlib inline

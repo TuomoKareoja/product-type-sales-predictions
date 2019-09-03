@@ -1,9 +1,3 @@
-"""
-.. module:: clean_data.py
-    :synopsis:
-
-"""
-
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 import pandas as pd
@@ -22,6 +16,11 @@ data_pred["train"] = False
 
 # setting predicted volume to missing instead of 0
 data_pred["Volume"] = np.nan
+
+# Dropping extended warranties from the training dataset
+# These observations seem to broken as their feature values
+# are almost identical
+data_train.query('ProductType != "ExtendedWarranty"', inplace=True)
 
 # Renaming columns
 data = pd.concat([data_train, data_pred])
@@ -58,10 +57,6 @@ data.drop(columns=["rew_5star"], inplace=True)
 
 # mark depth, width and height 0 as missing
 data[["weight", "depth", "width"]].replace(0, np.nan, inplace=True)
-
-# Extended warranties are very different from other products and their reviews
-# seem to be broken. So dropping.
-data.query('product_type != "ExtendedWarranty"', inplace=True)
 
 # saving to /clean
 data_clean_path = os.path.join("data", "clean", "clean_train_pred.csv")

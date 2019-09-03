@@ -1,27 +1,21 @@
 #%%
 
-# Importing libraries
-import pandas as pd
-import numpy as np
-import sklearn
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn
 from dotenv import find_dotenv, load_dotenv
 from IPython.core.interactiveshell import InteractiveShell
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import ElasticNetCV
-from sklearn import preprocessing
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import KFold
-from sklearn import metrics
-from sklearn.pipeline import make_pipeline
+from sklearn import metrics, preprocessing
 from sklearn.feature_selection import RFECV
+from sklearn.linear_model import ElasticNet, ElasticNetCV, LinearRegression
+from sklearn.model_selection import KFold, cross_val_predict, cross_val_score
+from sklearn.pipeline import make_pipeline
 
-from src.visualization.visualize import plot_cv_predictions
-
+from src.visualization.visualize_cv import plot_cv_predictions
 
 # Setting styles
 # %matplotlib inline
@@ -320,6 +314,7 @@ glmnet_best_params_matching
 pipelines = []
 
 pipelines.append(("GLMNET", make_pipeline(ElasticNet(**glmnet_best_params_matching))))
+pipelines.append(("LM", make_pipeline(LinearRegression())))
 
 plot_cv_predictions(
     pipelines=pipelines,
@@ -329,6 +324,37 @@ plot_cv_predictions(
     file_suffix="best_rfe",
 )
 
+# This makes the model perform clearly better and interestingly glmnet still
+# performs better than linear regression even though we already did aggressive
+# feature selection so the regularization should help less
+
+#%%
+
+# Checking which columns were used
+
+X_rfe.columns
+
+# [
+#     "rew_4star",
+#     "rew_3star",
+#     "rew_2star",
+#     "negative_service_review",
+#     "recommend_product",
+#     "width",
+#     "profit_margin",
+#     "product_type_Accessories",
+#     "product_type_GameConsole",
+#     "product_type_Laptop",
+#     "product_type_Netbook",
+#     "product_type_PC",
+#     "product_type_Printer",
+#     "product_type_PrinterSupplies",
+#     "product_type_Smartphone",
+#     "product_type_Software",
+#     "product_type_Tablet",
+# ]
+
+# Interestingly all product types were retained
 
 #%%
 
@@ -339,59 +365,16 @@ is_laptop = X.product_type_Laptop == 1
 is_netbook = X.product_type_Netbook == 1
 is_smartphone = X.product_type_Smartphone == 1
 
-y_lim_pred = y[(is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)]
+limited_cat = ((is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)).to_list()
 
-pipelines = []
-pipelines.append(("GLMNET", make_pipeline(ElasticNet(**glmnet_best_params_matching))))
-
-path_figures = os.path.join("reports", "figures")
-
-for name, pipeline in pipelines:
-    predicted_outsample = cross_val_predict(pipeline, X_rfe, y, cv=crossvalidation)
-    predicted_insample = pipeline.fit(X_rfe, y).predict(X_rfe)
-
-    predicted_outsample = predicted_outsample[
-        (is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)
-    ]
-
-    predicted_insample = predicted_insample[
-        (is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)
-    ]
-    fig, ax = plt.subplots()
-    ax.scatter(y_lim_pred, predicted_outsample, c="r", marker="+", label="outsample")
-    ax.scatter(y_lim_pred, predicted_insample, c="b", marker="x", label="insample")
-    ax.plot(
-        [y_lim_pred.min(), y_lim_pred.max()],
-        [y_lim_pred.min(), y_lim_pred.max()],
-        "k--",
-        lw=3,
-    )
-    model_mean_absolute_error_outsample = round(
-        metrics.mean_absolute_error(y_lim_pred, predicted_outsample), 0
-    )
-    model_mean_absolute_error_insample = round(
-        metrics.mean_absolute_error(y_lim_pred, predicted_insample), 0
-    )
-    plt.text(
-        0.05,
-        0.9,
-        "Mean absolute error (outsample): " + str(model_mean_absolute_error_outsample),
-        transform=ax.transAxes,
-    )
-    plt.text(
-        0.05,
-        0.8,
-        "Mean absolute error (insample): " + str(model_mean_absolute_error_insample),
-        transform=ax.transAxes,
-    )
-    ax.set_xlabel("Actual Volume")
-    ax.set_ylabel("Predicted Volume")
-    plt.legend(loc=4)
-    fig.suptitle(name + ": " + "Predicted vs Actual")
-    plot_title = "predictions_" + "best_lim_pred" + "_" + name.lower() + ".png"
-    plt.savefig(os.path.join(path_figures, plot_title))
-    plt.show()
-    plt.clf()
+plot_cv_predictions(
+    pipelines=pipelines,
+    X=X_rfe,
+    y=y,
+    crossvalidation=crossvalidation,
+    file_suffix="best_rfe_lim_pred",
+    limited_pred_mask=limited_cat,
+)
 
 # Looks quite bad as the some of the predictions are actually negative
 
@@ -414,9 +397,6 @@ X_lim_pred = X_rfe[(is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)]
 # We need to define our crossvalidation again to match the more limited number
 # of observations
 crossvalidation = KFold(n_splits=13, shuffle=True, random_state=seed)
-
-pipelines = []
-pipelines.append(("GLMNET", make_pipeline(ElasticNet(**glmnet_best_params_matching))))
 
 path_figures = os.path.join("reports", "figures")
 
@@ -456,11 +436,14 @@ for name, pipeline in pipelines:
     ax.set_ylabel("Predicted Volume")
     plt.legend(loc=4)
     fig.suptitle(name + ": " + "Predicted vs Actual")
-    plot_title = "predictions_" + "best_lim_pred_train" + "_" + name.lower() + ".png"
+    plot_title = (
+        "predictions_" + "best_ref_lim_pred_train" + "_" + name.lower() + ".png"
+    )
     plt.savefig(os.path.join(path_figures, plot_title))
     plt.show()
     plt.clf()
 
 
-#%%
+# models are much worse than they were with using bigger dataset
 
+#%%

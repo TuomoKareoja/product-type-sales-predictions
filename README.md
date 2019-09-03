@@ -12,8 +12,6 @@ Ubiqum Data Science Bootcamp project. Predicting future sales of different produ
 │   ├── processed      <- The final data sets for modeling.
 │   └── raw            <- The original data.
 │
-├── docs               <- A default Sphinx project. See sphinx-doc.org.
-│
 ├── models
 │    ├── final         <- Models trained with all data.
 │    └── train         <- Models trained with training data.
@@ -32,17 +30,11 @@ Ubiqum Data Science Bootcamp project. Predicting future sales of different produ
 ├── src                <- Source code for use in this project.
 │   │
 │   ├── data           <- Scripts to download and generate data.
-│   │   └── make_datasets.py
 │   │
 │   ├── models         <- Scripts to train models and then use models to make
-│   │   │                 predictions. Hyperparameter tuning done in notebooks.
-│   │   ├── predict_comparisons.py
-│   │   ├── predict_final.py
-│   │   ├── train_models_comparison.py
-│   │   └── train_models_final.py
+│   │                     predictions. Hyperparameter tuning done in notebooks.
 │   │
 │   └── visualization  <- Scripts to create exploratory visualizations
-│       └── visualize.py
 │
 ├── .env               <- variables for dotenv. NOT in version control
 ├── .gitignore
@@ -75,9 +67,3 @@ Give examples
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc

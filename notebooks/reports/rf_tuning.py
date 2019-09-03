@@ -1,28 +1,27 @@
 #%%
 
-# Importing libraries
-import pandas as pd
-import numpy as np
-import sklearn
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sklearn
 from dotenv import find_dotenv, load_dotenv
 from IPython.core.interactiveshell import InteractiveShell
-from sklearn import preprocessing
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import KFold
-from sklearn import metrics
-from sklearn.pipeline import make_pipeline
-from sklearn.feature_selection import RFECV
-
-from sklearn.linear_model import LinearRegression
+from sklearn import metrics, preprocessing
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import RFECV
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import (
+    KFold,
+    RandomizedSearchCV,
+    cross_val_predict,
+    cross_val_score,
+)
+from sklearn.pipeline import make_pipeline
 
-from src.visualization.visualize import plot_cv_predictions
-from sklearn.model_selection import RandomizedSearchCV
-
+from src.visualization.visualize_cv import plot_cv_predictions
 
 # Setting styles
 # %matplotlib inline
@@ -197,9 +196,8 @@ plot_cv_predictions(
 rf_random = RandomizedSearchCV(
     estimator=RandomForestRegressor(random_state=seed),
     param_distributions=random_grid,
-    n_iter=150,
-    # leaving 2 rows out
-    cv=10,
+    n_iter=60,
+    cv=crossvalidation,
     verbose=2,
     random_state=seed,
     n_jobs=-1,
@@ -207,7 +205,13 @@ rf_random = RandomizedSearchCV(
 
 rf_random.fit(X_mif, y)
 
+#%%
+
+# Cheking out the found hyperparameters
 rf_best_parameters = rf_random.best_params_
+
+rf_best_parameters
+
 
 #%%
 
@@ -216,81 +220,24 @@ rf_best_parameters = rf_random.best_params_
 pipelines = []
 pipelines.append(("RF_mif", make_pipeline(RandomForestRegressor(**rf_best_parameters))))
 
-plot_cv_predictions(
-    pipelines=pipelines,
-    X=X_mif,
-    y=y,
-    crossvalidation=crossvalidation,
-    file_suffix="best",
-)
-
-# The insample error went down but the outsample error rose. It seems that there is
-# actually not enough data to do reliable hyperparameter optimization
-
-#%%
-
-# Trying how the model handels when we limit the predictions to only somewhat related
-# product types
-
-# Dropping rows that are not interesting for our predictions
 is_pc = X.product_type_PC == 1
 is_laptop = X.product_type_Laptop == 1
 is_netbook = X.product_type_Netbook == 1
 is_smartphone = X.product_type_Smartphone == 1
 
-y_lim_pred = y[(is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)]
+limited_cat = ((is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)).to_list()
 
-pipelines = []
-pipelines.append(("RF", make_pipeline(RandomForestRegressor(**rf_best_parameters))))
+plot_cv_predictions(
+    pipelines=pipelines,
+    X=X_mif,
+    y=y,
+    crossvalidation=crossvalidation,
+    file_suffix="best_mif_lim_pred",
+    limited_pred_mask=limited_cat,
+)
 
-path_figures = os.path.join("reports", "figures")
-
-for name, pipeline in pipelines:
-    predicted_outsample = cross_val_predict(pipeline, X_mif, y, cv=crossvalidation)
-    predicted_insample = pipeline.fit(X_mif, y).predict(X_mif)
-
-    predicted_outsample = predicted_outsample[
-        (is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)
-    ]
-
-    predicted_insample = predicted_insample[
-        (is_pc) | (is_laptop) | (is_netbook) | (is_smartphone)
-    ]
-    fig, ax = plt.subplots()
-    ax.scatter(y_lim_pred, predicted_outsample, c="r", marker="+", label="outsample")
-    ax.scatter(y_lim_pred, predicted_insample, c="b", marker="x", label="insample")
-    ax.plot(
-        [y_lim_pred.min(), y_lim_pred.max()],
-        [y_lim_pred.min(), y_lim_pred.max()],
-        "k--",
-        lw=3,
-    )
-    model_mean_absolute_error_outsample = round(
-        metrics.mean_absolute_error(y_lim_pred, predicted_outsample), 0
-    )
-    model_mean_absolute_error_insample = round(
-        metrics.mean_absolute_error(y_lim_pred, predicted_insample), 0
-    )
-    plt.text(
-        0.05,
-        0.9,
-        "Mean absolute error (outsample): " + str(model_mean_absolute_error_outsample),
-        transform=ax.transAxes,
-    )
-    plt.text(
-        0.05,
-        0.8,
-        "Mean absolute error (insample): " + str(model_mean_absolute_error_insample),
-        transform=ax.transAxes,
-    )
-    ax.set_xlabel("Actual Volume")
-    ax.set_ylabel("Predicted Volume")
-    plt.legend(loc=4)
-    fig.suptitle(name + ": " + "Predicted vs Actual")
-    plot_title = "predictions_" + "best_lim_pred" + "_" + name.lower() + ".png"
-    plt.savefig(os.path.join(path_figures, plot_title))
-    plt.show()
-    plt.clf()
+# The insample error went down but the outsample error rose. It seems that there is
+# actually not enough data to do reliable hyperparameter optimization
 
 #%%
 
