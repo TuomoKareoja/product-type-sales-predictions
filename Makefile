@@ -25,15 +25,15 @@ export_environment:
 
 ## clean the data
 clean_data:
-	python src/data/clean_data.py
+	python -m src.data.clean_data
 
 ## Add features to cleaned data
 build_features:
-	python src/data/build_features.py
+	python -m src.data.build_features
 
 ## Train final models and predict with them
 predict:
-	python src/models/train_and_predict_comparison.py
+	python -m src.models.train_and_predict
 
 ## Delete all compiled Python files
 clean:

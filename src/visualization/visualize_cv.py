@@ -27,7 +27,9 @@ def add_values(bp, ax):
                 )
 
 
-def plot_cv_scores(pipelines, X, y, crossvalidation, scoring, file_suffix=""):
+def plot_cv_scores(
+    pipelines, X, y, crossvalidation, scoring, file_suffix="", show=True
+):
     """Plots crossvalidation scores with given scoring methods and pipeline
     
     Arguments:
@@ -39,6 +41,7 @@ def plot_cv_scores(pipelines, X, y, crossvalidation, scoring, file_suffix=""):
  
     Keyword Arguments:
         file_suffix {str} -- suffix to add to plot names to distinguish them (default: {""})
+        show {bool} -- print the plot with plt.show() (default: {"True"})
     """
 
     path_figures = os.path.join("reports", "figures")
@@ -72,7 +75,8 @@ def plot_cv_scores(pipelines, X, y, crossvalidation, scoring, file_suffix=""):
         )
         plt.xticks(rotation=90)
         plt.savefig(os.path.join(path_figures, plot_title), dpi=200)
-        plt.show()
+        if show:
+            plt.show()
         plt.clf()
 
 
@@ -85,6 +89,7 @@ def plot_cv_predictions(
     transformation=None,
     round_digits=0,
     limited_pred_mask=None,
+    show=True,
 ):
     """Plots crossvalidation predictions with given pipelines
     
@@ -99,6 +104,7 @@ def plot_cv_predictions(
         transformation {str} -- What transformation to apply to predictions after creating them (default: {None})
         round_digits {int} -- How many digits to show in printed error measures (default: {0})
         limited_pred_mask {bool_list} -- Boolean list to filter the shown predictions (default: {False})
+        show {bool} -- print the plot with plt.show() (default: {"True"})
     """
 
     path_figures = os.path.join("reports", "figures")
@@ -149,5 +155,6 @@ def plot_cv_predictions(
         fig.suptitle(name + ": " + "Predicted vs Actual")
         plot_title = "predictions_" + file_suffix + "_" + name.lower() + ".png"
         plt.savefig(os.path.join(path_figures, plot_title))
-        plt.show()
+        if show:
+            plt.show()
         plt.clf()
