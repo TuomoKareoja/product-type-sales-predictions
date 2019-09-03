@@ -35,6 +35,10 @@ build_features:
 predict:
 	python -m src.models.train_and_predict
 
+## Train final models and predict with them
+visual:
+	python -m src.visualization.visualize_pred
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
