@@ -64,59 +64,95 @@
 
 \newpage
 
-\section{Predicted Sales for New Laptops, Smartphones, Netbooks }
+\section{Predicted Sales for New Laptops, Smartphones, Netbooks}
 
-Picture of
-
-\bigskip
-{
-    \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{brand_preference_plain.png}
-    \par
-}
-\bigskip
-
-These are results of the brand preference question after we added in our predictions. We can wee that Sony
-is clearly the more preferred brand.
+We predicted the sales volume for future products in the categories Laptops,
+PCs, Smartphones and Netbooks. Below are the predicted volumes. One of the Netbooks
+looks like a clear winner, but if we concentrate on the categories we see that
+our new smartphones were predicted to perform well all around except for product 195.
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{brand_preference_marked.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predicted_volume_rf.png}
     \par
 }
 \bigskip
 
-If we separate from the non-missing answers and the predicted answers, we see
-that there were quite a lot of predicted values, but that the brand preference distribution
-is the same for both. We can see this even more clearly in a percentage plot.
+\section{Selected Model and It's Performance}
+
+The model that was used to create these predictions was a Random Forest Model.
+The model was trained using all the data in training set, except for the
+Extended Warranties. This means that we used product categories as different
+from our categories of interest as Printer Supplies and accessories.
+
+Below are the predictions for volume in the training set. Included in the graph
+are both the predictions made from by training with the whole dataset and the predicting
+the values with this model (insample) and predictions made by training the model without
+the observation that was predicted (outsample). The more reliable measure of the models
+actual predictive power is the outsample error. We can see that the model is not very
+good with products that have actual sales volumes of over 2000 and this is particularly
+true for the outsample predictions. We also see that the outsample error is over twice that
+of the insample error. This means that despite our efforts there is substantial overfitting
+of the model to the train dataset.
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{brand_preference_marked_percentages.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_final_rf.png}
     \par
 }
 \bigskip
 
-If our model is correct (and it is very accurate) this suggests that the missing brand preference values
-do not bias our estimate of the brand preference distribution, so in this sense adding in the missing
-values does not give any value. On the other hand our model is very accurate and in the future
-the answers might not be missing at random. If this is the case, we now have proven that we can make
-an accurate model that can correct this bias.
-
-\section{Chosen Model and Its' Performance}
-
-The model used for the predictions is a C5.0 classification tree. From the the graphs below we can see that
-on all the important metrics this model performs really well with the train set accuracy being 93.5 \% and
-with test set 92.3 \%. This shows that the model is accurate and at the same time
-the risk of overfitting is low with the
-test and train metrics being so close to each other. This goes for all the other performance metrics as well.
+As we in the end interested only in the models accuracy to in predicting the volumes
+of PCs, Laptops, Smartphones and Netbooks, below is the same graph as before, but now
+only showing products of these categories:
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_c5_train.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_final_lim_pred_rf.png}
+    \par
+}
+\bigskip
+
+The model seems to actually work quite good in this case, but we see the same problems of overfitting
+and poor performance when the number of sales is high.
+
+Out of curiosity we also tried to train the model on just Smartphones, PCs, Laptops and Smartphones.
+This did not work out well. Even though conceptually it makes sense to use similar products for
+predictions, the amount of data that we have was so small that the model is very unreliable.
+Below is the familiar plot of the model predicting just product from our categories of interest:
+
+\bigskip
+{
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_best_lim_pred_train_rf.png}
+    \par
+}
+\bigskip
+
+
+\section{Relation of Reviews to Sales Volume}
+
+On top of predicting with the model. We were asked to analyse the relation of the reviews
+the to the sales volume. To do this we combined all the laptops, smartphones, PCs and Netbooks
+from both the training data and the new products. Because the new products did of course
+not have a sales volume, we used our predictions for these. We also did not use
+all the review columns for our model as this made the model less accurate. The review columns
+that were dropped were 5 star reviews and negative service reviews. 5 star reviews
+were dropped because they had a perfect correlation with the volume and as this is
+almost impossible in real life, the column was dropped as faulty. The negative service
+reviews were dropped because they did not make the model any more accurate after
+we added positive service reviews. These reviews seem to provide almost identical
+information.
+
+Here are the graphs for the relationship of the number of reviews to sales volume:
+
+\bigskip
+{
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{volume_x1StarReviews_relation.png}
     \par
 }
 \bigskip
@@ -124,78 +160,52 @@ test and train metrics being so close to each other. This goes for all the other
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_c5.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{volume_x2StarReviews_relation.png}
     \par
 }
 \bigskip
-
-As the C5.0 decision tree is too complex to understandably visualize. We can instead look at the
-relative model feature importances:
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{c5_full_feature_importance.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{volume_x3StarReviews_relation.png}
     \par
 }
 \bigskip
-
-We can see that by far the most import variable is the salary of the customer. If we plot the distribution
-of salary with the brand preference, we can see that there are clear differences in brand preference, but that these
-are quite complex and nonlinear and would have not been easily captured with a linear model. Tree
-type models catch these kind of complex relationships much more easily.
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{brand_salary_distribution.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{volume_x4StarReviews_relation.png}
     \par
 }
 \bigskip
+
+\bigskip
+{
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{volume_PositiveServiceReview_relation.png}
+    \par
+}
+\bigskip
+
+We can see that the relation is always positive so more reviews in itself
+are related to larger sales amount even for low reviews. This relationship can be seen in both
+the actual data volume and the predicted volume. It seems that the most
+import information about the reviews is just their number and not their
+message.
 
 
 \section{Model Comparison and Performance}
 
-In total three different model types were tried: C5.0, Random Forest (RF) and Extreme Gradient Boosting (EGB).
-All of these model are tree based models and all performed excellently. This made choosing the right model
-quite problematic.
-
-From the cross validation boxplots we can see that all models perform very well in all metrics and that
-the results have a tight spread. This suggests that the models have good performance would probably
-generalize well to previously unknown data as well.
+Four models were considered for the predictions: K-nearest Neighbors (KNN)
+Linear models, Support Vector Machines (SVM) and Random Forest. Below are graphs
+of their performance without hyperparameter optimization and feature selection.
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{dotplot_comparison.png}
-    \par
-}
-\bigskip
-
-The small differences between the models can best be seen in the ROC-curve calculated with test data:
-
-\bigskip
-{
-    \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{AUC_comparison.png}
-    \par
-}
-\bigskip
-
-The models are almost indistinguishable, with our chosen C5.0 model maybe somewhat getting a head around
-the optimal (Youden Index) point closest to the left upper corner of the graph.
-
-If we look at the results of the other two models more closely, we see that the Random Forest
-model has the smallest difference between the metrics from train and test datasets. This
-would suggest that this model is the most generalizable of the models tested. It did not
-as well as the C5.0 with AUC-measure (previous boxplot) and sensitivity, but beat it on
-specificity. The confidence interval of the cross validated metrics were overlapping though
-so we can't say with high confidence that C5.0 is strictly better.
-
-\bigskip
-{
-    \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_rf.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_unoptimized_simple_knn.png}
     \par
 }
 \bigskip
@@ -203,20 +213,7 @@ so we can't say with high confidence that C5.0 is strictly better.
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_rf_train.png}
-    \par
-}
-\bigskip
-
-Extreme Gradient Boosting had a metric score difference between train and test datasets, which
-was comparable to C5.0 model. It also performed less well than C5.0 on AUC-measure and specificity,
-but had the best sensitivity of all the models. All in all also a very good model, but slightly
-worse than C5.0 and Random Forest.
-
-\bigskip
-{
-    \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_egb.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_unoptimized_simple_lm.png}
     \par
 }
 \bigskip
@@ -224,34 +221,53 @@ worse than C5.0 and Random Forest.
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{cm_egb_train.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_unoptimized_simple_svm.png}
     \par
 }
 \bigskip
-
-\section{Ensemble Models?}
-
-When looking at the cross validation model AUC-scores we see that the
-correlation between these scores is very low between the models
-(AUC scores don't line up neatly on the diagonal).
 
 \bigskip
 {
     \centering
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{model_prediction_correlations.png}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_unoptimized_simple_rf.png}
     \par
 }
 \bigskip
 
-This means that the model seem to be making different kinds of mistakes.
-We could try to exploit this by building an ensemble model our individual model results.
-This was tried, with the best model being a combination of C5.0 and
-Random Forest. This model actually had slightly better scores on all metrics
-than individual models, but the improvement was very small and at the same
-time the model showed signs of overfitting with it having the biggest difference
-in performance between train and test set. Because the increase in performance so small
-it was deemed unwise to increase the complexity of the model by using an ensemble method.
-With the bigger difference between the train and test set this complex model was showing
-signs of overfit although it still performed better than other models with the test set.
+We can see that the random forest performed clearly the best, even though
+it was clearly overfitting. SVM and KNN did not have the overfitting problem,
+but were overall less accurate.
+
+From these investigations KNN and SVM were dropped as their accuracy
+was less than Random Forest and their interpretability is not very good.
+Linear models were kept for further investigations although their results
+were the worst, because it was thought that model could be improved much
+with regularization and that its interpretability could prove interesting.
+This was not to prove so as even with two steps of feature selection with
+a separate linear model and applying L1 and L2 regularization with GLMNET
+model, the performance remained poor. Further problem with the linear model
+was that it was prone to give predictions for volume that were below 0. This
+is almost and unavoidable problem for linear models when training data includes
+volumes that are already very close to zero or even zero. Below you can see
+the graph of the performance of the best linear model that we produced:
+
+\bigskip
+{
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_final_glmnet.png}
+    \par
+}
+\bigskip
+
+Finally here are the results when limit predictions to the product
+of our categories of interest:
+
+\bigskip
+{
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{predictions_final_lim_pred_glmnet.png}
+    \par
+}
+\bigskip
 
 \end{document}
