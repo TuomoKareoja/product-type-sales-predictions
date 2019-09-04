@@ -7,19 +7,11 @@ Ubiqum Data Science Bootcamp project. Predicting future sales of different produ
 ```
 ├── data
 │   ├── clean          <- Data that has been cleaned of any clear errors.
-│   ├── interim        <- Intermediate step for big data transformations.
 │   ├── predictions    <- predictions made with models.
 │   ├── processed      <- The final data sets for modeling.
 │   └── raw            <- The original data.
 │
-├── models
-│    ├── final         <- Models trained with all data.
-│    └── train         <- Models trained with training data.
-│
 ├── notebooks          <- Jupyter notebooks and other notebooklike objects.
-│    │                    Names start with a number for ordering
-│    │                    and have a `_` delimited description,
-│    │                    e.g. `1.0_initial_data_exploration`.
 │    ├── exploratory   <- Lab books and work in progress. NOT IN remote repository.
 │    └── reports       <- Notebooks meant for others to read. IN remote repository.
 │
@@ -28,15 +20,11 @@ Ubiqum Data Science Bootcamp project. Predicting future sales of different produ
 │   └── main           <- LaTeX, PDF, etc.
 │
 ├── src                <- Source code for use in this project.
-│   │
 │   ├── data           <- Scripts to download and generate data.
-│   │
 │   ├── models         <- Scripts to train models and then use models to make
 │   │                     predictions. Hyperparameter tuning done in notebooks.
-│   │
 │   └── visualization  <- Scripts to create exploratory visualizations
 │
-├── .env               <- variables for dotenv. NOT in version control
 ├── .gitignore
 ├── environment.yml    <- Conda environment file for reproducing the environment.
 ├── LICENSE.md         <- MIT Licence
@@ -44,24 +32,46 @@ Ubiqum Data Science Bootcamp project. Predicting future sales of different produ
 └── README.md
 ```
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
-```bash
-Give examples
-```
+Conda
 
 ### Recreating the Analysis
 
-What commands need to be run the critical parts of the analysis
+1. Recreating the environment
 
 ```bash
-Give examples
+make create_environment
+```
+
+2. Activate the conda environment (the rest of the make commands don't work without having the enviroment manually activated)
+
+```bash
+conda activate product-type-sales-prediction
+```
+
+3. Cleaning the data
+
+```bash
+make clean_data
+```
+
+4. "Building features" (really for this project just dropping one row and formatting the data for easy use)
+
+```bash
+make build_features
+```
+
+5. Training and predicting with the final models
+
+```bash
+make predict
+```
+
+6. Visualizing the predictions
+
+```bash
+make visual
 ```
 
 ## License
